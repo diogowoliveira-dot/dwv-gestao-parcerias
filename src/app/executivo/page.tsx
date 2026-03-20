@@ -51,7 +51,7 @@ function KpiCard({
         {valor}
       </span>
       {sublabel && (
-        <span className="text-[#666666] text-[11px]">{sublabel}</span>
+        <span className="text-[#999999] text-xs">{sublabel}</span>
       )}
     </div>
   );
@@ -246,9 +246,9 @@ function ExecutivoDashboard() {
                 </span>
               )}
             </div>
-            <p className="text-[#888888] text-sm mt-0.5">{exec.cargo}</p>
-            <p className="text-[#555555] text-xs mt-0.5">
-              Gestor: {gestor.nome}
+            <p className="text-[#CCCCCC] text-sm mt-1">{exec.cargo}</p>
+            <p className="text-[#999999] text-sm mt-0.5">
+              Gestor: <span className="text-white font-medium">{gestor.nome}</span>
             </p>
           </div>
           <select
@@ -355,9 +355,9 @@ function ExecutivoDashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#1A1A1A]">
-                  <th className="text-left text-[#555555] text-xs font-medium uppercase tracking-wider px-4 py-3">Evento</th>
-                  <th className="text-left text-[#555555] text-xs font-medium uppercase tracking-wider px-4 py-3">Data</th>
-                  <th className="text-right text-[#555555] text-xs font-medium uppercase tracking-wider px-4 py-3">Participantes</th>
+                  <th className="text-left text-[#888888] text-xs font-medium uppercase tracking-wider px-4 py-3">Evento</th>
+                  <th className="text-left text-[#888888] text-xs font-medium uppercase tracking-wider px-4 py-3">Data</th>
+                  <th className="text-right text-[#888888] text-xs font-medium uppercase tracking-wider px-4 py-3">Participantes</th>
                 </tr>
               </thead>
               <tbody>
@@ -380,7 +380,7 @@ function ExecutivoDashboard() {
               <span className="material-symbols-outlined text-[#CC0000]/60 text-lg mt-0.5">{acao.icon}</span>
               <div className="flex flex-col gap-0.5">
                 <span className="text-2xl font-bold text-white">{acao.valor}</span>
-                <span className="text-[#888888] text-[11px] font-medium leading-tight">{acao.label}</span>
+                <span className="text-[#AAAAAA] text-xs font-medium leading-tight">{acao.label}</span>
               </div>
             </div>
           ))}
@@ -391,11 +391,11 @@ function ExecutivoDashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#1A1A1A]">
-                <th className="text-left text-[#555555] text-xs font-medium uppercase tracking-wider px-4 py-3">Imobiliária</th>
-                <th className="text-right text-[#555555] text-xs font-medium uppercase tracking-wider px-4 py-3">Total Corretores</th>
-                <th className="text-right text-[#555555] text-xs font-medium uppercase tracking-wider px-4 py-3">Ativos</th>
-                <th className="text-right text-[#555555] text-xs font-medium uppercase tracking-wider px-4 py-3">Novos</th>
-                <th className="text-center text-[#555555] text-xs font-medium uppercase tracking-wider px-4 py-3">Integração</th>
+                <th className="text-left text-[#888888] text-xs font-medium uppercase tracking-wider px-4 py-3">Imobiliária</th>
+                <th className="text-right text-[#888888] text-xs font-medium uppercase tracking-wider px-4 py-3">Total Corretores</th>
+                <th className="text-right text-[#888888] text-xs font-medium uppercase tracking-wider px-4 py-3">Ativos</th>
+                <th className="text-right text-[#888888] text-xs font-medium uppercase tracking-wider px-4 py-3">Novos</th>
+                <th className="text-center text-[#888888] text-xs font-medium uppercase tracking-wider px-4 py-3">Integração</th>
               </tr>
             </thead>
             <tbody>
@@ -409,7 +409,7 @@ function ExecutivoDashboard() {
                       <div>
                         <span className="text-white font-medium">{imob.nome}</span>
                         {imob.novaNoPeríodo && (
-                          <span className="ml-2 text-[9px] font-bold uppercase text-[#00CC44] bg-[#00CC44]/10 px-1.5 py-0.5 rounded">nova</span>
+                          <span className="ml-2 text-[10px] font-bold uppercase text-[#00CC44] bg-[#00CC44]/10 px-2 py-0.5 rounded">nova</span>
                         )}
                       </div>
                     </div>

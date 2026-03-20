@@ -105,7 +105,7 @@ function KpiCard({
         {valor}
       </span>
       {sublabel && (
-        <span className="text-[#666666] text-[11px]">{sublabel}</span>
+        <span className="text-[#999999] text-xs">{sublabel}</span>
       )}
     </div>
   );
@@ -210,11 +210,13 @@ export default function GestorDashboard() {
               <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#00CC44]/10 text-[#00CC44] border border-[#00CC44]/20">
                 {gestor.status}
               </span>
+              <div className="flex items-center gap-1.5 bg-[#CC0000]/10 border border-[#CC0000]/25 rounded-full px-3 py-1">
+                <span className="material-symbols-outlined text-[#CC0000] text-sm">groups</span>
+                <span className="text-white text-sm font-bold">{equipe.length}</span>
+                <span className="text-[#CCCCCC] text-xs">executivos</span>
+              </div>
             </div>
-            <p className="text-[#888888] text-sm mt-0.5">{gestor.cargo}</p>
-            <p className="text-[#555555] text-xs mt-0.5">
-              {equipe.length} executivos na equipe
-            </p>
+            <p className="text-[#CCCCCC] text-sm mt-1">{gestor.cargo}</p>
           </div>
         </div>
 
@@ -259,13 +261,13 @@ export default function GestorDashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#1A1A1A]">
-                <th className="text-center text-[#555555] text-xs font-medium uppercase tracking-wider px-3 py-3 w-12">#</th>
-                <th className="text-left text-[#555555] text-xs font-medium uppercase tracking-wider px-4 py-3">Executivo</th>
-                <th className="text-center text-[#555555] text-xs font-medium uppercase tracking-wider px-3 py-3">Propostas</th>
-                <th className="text-center text-[#555555] text-xs font-medium uppercase tracking-wider px-3 py-3">Corretores Ativos</th>
-                <th className="text-center text-[#555555] text-xs font-medium uppercase tracking-wider px-3 py-3">Imobiliárias</th>
-                <th className="text-left text-[#555555] text-xs font-medium uppercase tracking-wider px-4 py-3 w-52">Meta Propostas</th>
-                <th className="text-center text-[#555555] text-xs font-medium uppercase tracking-wider px-3 py-3 w-20">Ação</th>
+                <th className="text-center text-[#888888] text-xs font-medium uppercase tracking-wider px-3 py-3 w-12">#</th>
+                <th className="text-left text-[#888888] text-xs font-medium uppercase tracking-wider px-4 py-3">Executivo</th>
+                <th className="text-center text-[#888888] text-xs font-medium uppercase tracking-wider px-3 py-3">Propostas</th>
+                <th className="text-center text-[#888888] text-xs font-medium uppercase tracking-wider px-3 py-3">Corretores Ativos</th>
+                <th className="text-center text-[#888888] text-xs font-medium uppercase tracking-wider px-3 py-3">Imobiliárias</th>
+                <th className="text-left text-[#888888] text-xs font-medium uppercase tracking-wider px-4 py-3 w-52">Meta Propostas</th>
+                <th className="text-center text-[#888888] text-xs font-medium uppercase tracking-wider px-3 py-3 w-20">Ação</th>
               </tr>
             </thead>
             <tbody>
@@ -296,7 +298,7 @@ export default function GestorDashboard() {
                         </div>
                         <div>
                           <span className="text-white font-medium text-sm">{exec.nome}</span>
-                          <span className="block text-[#555555] text-[11px]">
+                          <span className="block text-[#999999] text-xs">
                             {exec.imobiliarias.length} imob · {getCorretoresTotal(exec)} corretores
                           </span>
                         </div>
@@ -360,7 +362,7 @@ export default function GestorDashboard() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span
-                    className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                    className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
                       alerta.tipo === "critico"
                         ? "bg-[#CC0000]/10 text-[#CC0000]"
                         : "bg-[#FFCC00]/10 text-[#FFCC00]"
@@ -370,7 +372,7 @@ export default function GestorDashboard() {
                   </span>
                 </div>
                 <p className="text-white text-sm font-medium">{alerta.titulo}</p>
-                <p className="text-[#666666] text-xs mt-0.5">{alerta.descricao}</p>
+                <p className="text-[#AAAAAA] text-xs mt-0.5">{alerta.descricao}</p>
               </div>
             </div>
           ))}
