@@ -17,7 +17,7 @@ import {
   getPctAtingimento,
   type Executivo,
 } from "@/lib/parcerias-mock-data";
-import SimuladorMetas from "@/components/parcerias/SimuladorMetas";
+import SimuladorMetasPropostas from "@/components/parcerias/SimuladorMetas";
 
 const SEMAFORO = {
   verde: { bg: "#00CC44", text: "#00CC44", bar: "#00CC44" },
@@ -324,11 +324,11 @@ function ExecutivoDashboard() {
         </div>
 
         <div className="mt-10">
-          <SimuladorMetas
-            metaPropostasInicial={exec.meta.propostas}
-            propostasAtuaisInicial={exec.propostas.total}
-            corretoresCarteiraInicial={totalCorretores}
-            corretoresAtivosInicial={corretoresAtivos}
+          <SimuladorMetasPropostas
+            metaPropostas={exec.meta.propostas}
+            propostasAtuais={exec.propostas.total}
+            corretoresNaCarteira={totalCorretores}
+            corretoresAtivos={corretoresAtivos}
           />
         </div>
 

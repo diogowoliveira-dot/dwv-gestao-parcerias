@@ -16,7 +16,7 @@ import {
   gerarAlertas,
   type Executivo,
 } from "@/lib/parcerias-mock-data";
-import SimuladorMetas from "@/components/parcerias/SimuladorMetas";
+import SimuladorMetasPropostas from "@/components/parcerias/SimuladorMetas";
 
 const SEMAFORO = {
   verde: { bg: "#00CC44", text: "#00CC44", bar: "#00CC44" },
@@ -245,11 +245,11 @@ export default function GestorDashboard() {
         </div>
 
         <div className="mt-10">
-          <SimuladorMetas
-            metaPropostasInicial={gestor.meta.propostas}
-            propostasAtuaisInicial={totalPropostas}
-            corretoresCarteiraInicial={totalCorretores}
-            corretoresAtivosInicial={totalCorretoresAtivos}
+          <SimuladorMetasPropostas
+            metaPropostas={gestor.meta.propostas}
+            propostasAtuais={totalPropostas}
+            corretoresNaCarteira={totalCorretores}
+            corretoresAtivos={totalCorretoresAtivos}
           />
         </div>
 

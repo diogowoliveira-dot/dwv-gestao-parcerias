@@ -1,20 +1,29 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
-interface SimuladorProps {
-  metaPropostasInicial: number;
-  propostasAtuaisInicial: number;
-  corretoresCarteiraInicial: number;
-  corretoresAtivosInicial: number;
+// ============================================
+// INTERFACE — Props unificadas
+// ============================================
+interface SimuladorMetasPropostasProps {
+  metaPropostas: number;
+  propostasAtuais: number;
+  corretoresNaCarteira: number;
+  corretoresAtivos: number;
 }
 
+// ============================================
+// SEMÁFOROS
+// ============================================
 const SEMAFORO_META = (pct: number) =>
   pct >= 80 ? "#00CC44" : pct >= 50 ? "#FFCC00" : "#CC0000";
 
 const SEMAFORO_TE = (te: number) =>
   te >= 70 ? "#00CC44" : te >= 40 ? "#FFCC00" : "#CC0000";
 
+// ============================================
+// SLIDER INPUT
+// ============================================
 function SliderInput({
   label,
   value,
@@ -32,7 +41,8 @@ function SliderInput({
   onChange: (v: number) => void;
   suffix?: string;
 }) {
-  const pct = ((value - min) / (max - min)) * 100;
+  const range = max - min;
+  const pct = range > 0 ? ((value - min) / range) * 100 : 0;
 
   return (
     <div className="flex flex-col gap-2">
@@ -73,6 +83,9 @@ function SliderInput({
   );
 }
 
+// ============================================
+// METRIC BOX
+// ============================================
 function MetricBox({
   label,
   valor,
@@ -101,6 +114,9 @@ function MetricBox({
   );
 }
 
+// ============================================
+// ROTA CARD — sempre renderiza linhas
+// ============================================
 function RotaCard({
   titulo,
   subtitulo,
@@ -123,6 +139,7 @@ function RotaCard({
         <span className="text-white text-sm font-bold">{titulo}</span>
       </div>
       <p className="text-[#555555] text-[11px] mb-3">{subtitulo}</p>
+      {/* Linhas SEMPRE renderizadas — nunca depende de estado externo */}
       <div className="space-y-2">
         {linhas.map((l, i) => (
           <div key={i} className="flex items-center justify-between">
@@ -133,8 +150,9 @@ function RotaCard({
           </div>
         ))}
       </div>
+      {/* Alerta opcional — aparece DENTRO do card da Rota A sem afetar Rota B */}
       {alerta && (
-        <div className="mt-3 bg-[#CC0000]/8 border border-[#CC0000]/20 rounded px-3 py-2">
+        <div className="mt-3 bg-[#CC0000]/10 border border-[#CC0000]/20 rounded px-3 py-2">
           <p className="text-[#CC0000] text-[11px] leading-relaxed">
             <span className="material-symbols-outlined text-xs align-middle mr-1">
               warning
@@ -147,38 +165,74 @@ function RotaCard({
   );
 }
 
-export default function SimuladorMetas({
-  metaPropostasInicial,
-  propostasAtuaisInicial,
-  corretoresCarteiraInicial,
-  corretoresAtivosInicial,
-}: SimuladorProps) {
-  const [meta, setMeta] = useState(metaPropostasInicial);
-  const [propostasAtuais, setPropostasAtuais] = useState(propostasAtuaisInicial);
-  const [corretoresCarteira, setCorretoresCarteira] = useState(corretoresCarteiraInicial);
-  const [corretoresAtivos, setCorretoresAtivos] = useState(corretoresAtivosInicial);
+// ============================================
+// COMPONENTE PRINCIPAL — SimuladorMetasPropostas
+// ============================================
+export default function SimuladorMetasPropostas({
+  metaPropostas: metaInicial,
+  propostasAtuais: propostasInicial,
+  corretoresNaCarteira: carteiraInicial,
+  corretoresAtivos: ativosInicial,
+}: SimuladorMetasPropostasProps) {
+  const [meta, setMeta] = useState(metaInicial);
+  const [propostasAtuais, setPropostasAtuais] = useState(propostasInicial);
+  const [corretoresNaCarteira, setCorretoresNaCarteira] = useState(carteiraInicial);
+  const [corretoresAtivos, setCorretoresAtivos] = useState(ativosInicial);
 
+  // Sync com mudanças de props (ex: trocar executivo)
   useEffect(() => {
-    setMeta(metaPropostasInicial);
-    setPropostasAtuais(propostasAtuaisInicial);
-    setCorretoresCarteira(corretoresCarteiraInicial);
-    setCorretoresAtivos(corretoresAtivosInicial);
-  }, [metaPropostasInicial, propostasAtuaisInicial, corretoresCarteiraInicial, corretoresAtivosInicial]);
+    setMeta(metaInicial);
+    setPropostasAtuais(propostasInicial);
+    setCorretoresNaCarteira(carteiraInicial);
+    setCorretoresAtivos(ativosInicial);
+  }, [metaInicial, propostasInicial, carteiraInicial, ativosInicial]);
 
-  const te = corretoresCarteira > 0 ? (corretoresAtivos / corretoresCarteira) * 100 : 0;
-  const produtividade = corretoresAtivos > 0 ? propostasAtuais / corretoresAtivos : 0;
-  const progressoMeta = meta > 0 ? (propostasAtuais / meta) * 100 : 0;
+  // ——————————————————————————————————————
+  // LÓGICA DE CÁLCULO (conforme referência)
+  // ——————————————————————————————————————
+  const te = corretoresNaCarteira > 0
+    ? corretoresAtivos / corretoresNaCarteira
+    : 0;
+
+  const produtividade =
+    propostasAtuais > 0 && corretoresAtivos > 0
+      ? propostasAtuais / corretoresAtivos
+      : 0;
+
+  const progressoMeta = meta > 0 ? propostasAtuais / meta : 0;
   const gap = Math.max(0, meta - propostasAtuais);
 
-  const corretoresNecessariosA = produtividade > 0 ? Math.ceil(meta / produtividade) : 0;
-  const ativacoesNecessarias = Math.max(0, corretoresNecessariosA - corretoresAtivos);
-  const inativosDisponiveis = corretoresCarteira - corretoresAtivos;
-  const rotaAViavel = ativacoesNecessarias <= inativosDisponiveis;
+  // Rota A — ativar corretores
+  const ativosNecessarios = produtividade > 0
+    ? Math.ceil(meta / produtividade)
+    : 0;
+  const gapAtivos = Math.max(0, ativosNecessarios - corretoresAtivos);
+  const inativosDisponiveis = corretoresNaCarteira - corretoresAtivos;
+  const rotaAInviavel = gapAtivos > inativosDisponiveis;
 
-  const corretoresNecessariosB = te > 0 ? Math.ceil(corretoresNecessariosA / (te / 100)) : 0;
-  const gapCarteira = Math.max(0, corretoresNecessariosB - corretoresCarteira);
+  // Rota B — crescer a base (INDEPENDENTE da Rota A)
+  const carteiraNecessaria = te > 0
+    ? Math.ceil(ativosNecessarios / te)
+    : 0;
+  const gapCarteira = Math.max(0, carteiraNecessaria - corretoresNaCarteira);
 
-  const gerarConclusao = useCallback(() => {
+  // Conclusão
+  const ratioPorAtivo = produtividade > 0
+    ? Math.round(1 / produtividade)
+    : 0;
+
+  // ——————————————————————————————————————
+  // VALORES FORMATADOS PARA DISPLAY
+  // ——————————————————————————————————————
+  const teDisplay = (te * 100).toFixed(1);
+  const tePct = te * 100;
+  const progressoDisplay = (progressoMeta * 100).toFixed(0);
+  const progressoPct = progressoMeta * 100;
+
+  // ——————————————————————————————————————
+  // CONCLUSÃO EM LINGUAGEM NATURAL
+  // ——————————————————————————————————————
+  function gerarConclusao(): string {
     if (gap === 0) {
       return "Meta atingida! O executivo já alcançou ou superou a meta de propostas do período.";
     }
@@ -189,27 +243,26 @@ export default function SimuladorMetas({
       return "Nenhum corretor ativo na carteira. Todas as propostas precisam vir de novas ativações.";
     }
 
-    const razao = corretoresAtivos > 0 ? Math.round(corretoresAtivos / Math.max(propostasAtuais, 1)) : 0;
     const partes: string[] = [];
 
     partes.push(
-      `A cada ${razao} corretores ativos, o executivo gera ~1 proposta.`
+      `A cada ${ratioPorAtivo} corretores ativos, o executivo gera ~1 proposta.`
     );
     partes.push(
-      `Para atingir ${meta} propostas, precisa de ${corretoresNecessariosA} corretores ativos.`
+      `Para atingir ${meta} propostas, precisa de ${ativosNecessarios} corretores ativos.`
     );
 
     if (te > 0) {
       partes.push(
-        `Com a TE atual de ${te.toFixed(0)}%, isso requer ${corretoresNecessariosB} corretores na carteira`
+        `Com a TE atual de ${tePct.toFixed(0)}%, isso requer ${carteiraNecessaria} corretores na carteira`
       );
     }
 
-    if (rotaAViavel && ativacoesNecessarias > 0) {
+    if (!rotaAInviavel && gapAtivos > 0) {
       partes.push(
-        `— ou seja, +${ativacoesNecessarias} ativações de inativos da carteira atual.`
+        `— ou seja, +${gapAtivos} ativações de inativos da carteira atual.`
       );
-    } else if (!rotaAViavel) {
+    } else if (rotaAInviavel) {
       partes.push(
         `— a carteira atual não tem inativos suficientes. São necessários +${gapCarteira} novos cadastros além das ativações.`
       );
@@ -218,10 +271,14 @@ export default function SimuladorMetas({
     }
 
     return partes.join(" ");
-  }, [gap, produtividade, corretoresAtivos, propostasAtuais, meta, corretoresNecessariosA, te, corretoresNecessariosB, rotaAViavel, ativacoesNecessarias, gapCarteira]);
+  }
 
+  // ——————————————————————————————————————
+  // RENDER
+  // ——————————————————————————————————————
   return (
     <div className="bg-[#111111] border border-[#333333] rounded-lg overflow-hidden">
+      {/* Header */}
       <div className="px-5 py-4 border-b border-[#1A1A1A] flex items-center gap-2">
         <span className="material-symbols-outlined text-[#CC0000] text-lg">
           calculate
@@ -235,12 +292,13 @@ export default function SimuladorMetas({
       </div>
 
       <div className="p-5">
+        {/* Sliders interativos */}
         <div className="grid grid-cols-2 gap-x-8 gap-y-5 mb-6">
           <SliderInput
             label="Meta de Propostas"
             value={meta}
             min={1}
-            max={50}
+            max={200}
             step={1}
             onChange={setMeta}
             suffix="propostas"
@@ -255,12 +313,12 @@ export default function SimuladorMetas({
           />
           <SliderInput
             label="Corretores na Carteira"
-            value={corretoresCarteira}
+            value={corretoresNaCarteira}
             min={1}
-            max={500}
+            max={1000}
             step={1}
             onChange={(v) => {
-              setCorretoresCarteira(v);
+              setCorretoresNaCarteira(v);
               if (corretoresAtivos > v) setCorretoresAtivos(v);
             }}
           />
@@ -268,17 +326,18 @@ export default function SimuladorMetas({
             label="Corretores Ativos"
             value={corretoresAtivos}
             min={0}
-            max={corretoresCarteira}
+            max={corretoresNaCarteira}
             step={1}
             onChange={setCorretoresAtivos}
           />
         </div>
 
+        {/* Métricas calculadas automaticamente */}
         <div className="grid grid-cols-4 gap-3 mb-6">
           <MetricBox
             label="Taxa de Engajamento"
-            valor={`${te.toFixed(1)}%`}
-            cor={SEMAFORO_TE(te)}
+            valor={`${teDisplay}%`}
+            cor={SEMAFORO_TE(tePct)}
           />
           <MetricBox
             label="Produtividade"
@@ -288,8 +347,8 @@ export default function SimuladorMetas({
           />
           <MetricBox
             label="Progresso da Meta"
-            valor={`${progressoMeta.toFixed(0)}%`}
-            cor={SEMAFORO_META(progressoMeta)}
+            valor={`${progressoDisplay}%`}
+            cor={SEMAFORO_META(progressoPct)}
           />
           <MetricBox
             label="Gap"
@@ -299,7 +358,9 @@ export default function SimuladorMetas({
           />
         </div>
 
+        {/* Rotas estratégicas — SEMPRE independentes */}
         <div className="flex gap-4 mb-6">
+          {/* ROTA A */}
           <RotaCard
             titulo="Rota A — Ativar Corretores"
             subtitulo="Manter produtividade atual, aumentar engajamento"
@@ -307,26 +368,28 @@ export default function SimuladorMetas({
             linhas={[
               {
                 label: "Corretores ativos necessários",
-                valor: produtividade > 0 ? corretoresNecessariosA.toString() : "--",
+                valor: ativosNecessarios > 0 ? ativosNecessarios.toString() : "--",
                 cor: "#FFFFFF",
               },
               {
                 label: "Ativações necessárias",
-                valor: produtividade > 0 ? `+${ativacoesNecessarias}` : "--",
-                cor: ativacoesNecessarias === 0 ? "#00CC44" : "#FFCC00",
+                valor: ativosNecessarios > 0 ? `+${gapAtivos}` : "--",
+                cor: gapAtivos === 0 ? "#00CC44" : "#FFCC00",
               },
               {
                 label: "Inativos disponíveis",
                 valor: inativosDisponiveis.toString(),
-                cor: rotaAViavel ? "#00CC44" : "#CC0000",
+                cor: !rotaAInviavel ? "#00CC44" : "#CC0000",
               },
             ]}
             alerta={
-              produtividade > 0 && !rotaAViavel
-                ? `Carteira atual tem apenas ${inativosDisponiveis} inativos, mas ${ativacoesNecessarias} ativações são necessárias. Rota A sozinha não é viável.`
+              produtividade > 0 && rotaAInviavel
+                ? `Carteira atual tem apenas ${inativosDisponiveis} inativos, mas ${gapAtivos} ativações são necessárias. Rota A sozinha não é viável.`
                 : undefined
             }
           />
+
+          {/* ROTA B — sempre renderiza conteúdo, independente do estado da Rota A */}
           <RotaCard
             titulo="Rota B — Expandir Base"
             subtitulo="Manter TE atual, crescer a carteira de corretores"
@@ -334,23 +397,24 @@ export default function SimuladorMetas({
             linhas={[
               {
                 label: "Carteira necessária",
-                valor: te > 0 ? corretoresNecessariosB.toString() : "--",
+                valor: carteiraNecessaria > 0 ? carteiraNecessaria.toString() : "--",
                 cor: "#FFFFFF",
               },
               {
                 label: "Gap de carteira",
-                valor: te > 0 ? `+${gapCarteira}` : "--",
+                valor: carteiraNecessaria > 0 ? `+${gapCarteira}` : "--",
                 cor: gapCarteira === 0 ? "#00CC44" : "#FFCC00",
               },
               {
                 label: "TE a manter",
-                valor: `${te.toFixed(0)}%`,
-                cor: SEMAFORO_TE(te),
+                valor: `${tePct.toFixed(0)}%`,
+                cor: SEMAFORO_TE(tePct),
               },
             ]}
           />
         </div>
 
+        {/* Conclusão em linguagem natural — SEMPRE presente */}
         <div className="bg-[#0A0A0A] border border-[#1A1A1A] rounded-lg px-4 py-3">
           <div className="flex items-start gap-2">
             <span className="material-symbols-outlined text-[#CC0000] text-sm mt-0.5">
