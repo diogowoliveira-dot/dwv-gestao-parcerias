@@ -18,19 +18,13 @@ import {
   type Executivo,
 } from "@/lib/parcerias-mock-data";
 import SimuladorMetasPropostas from "@/components/parcerias/SimuladorMetas";
+import PeriodoPicker from "@/components/parcerias/PeriodoPicker";
 
 const SEMAFORO = {
   verde: { bg: "#00CC44", text: "#00CC44", bar: "#00CC44" },
   amarelo: { bg: "#FFCC00", text: "#FFCC00", bar: "#FFCC00" },
   vermelho: { bg: "#CC0000", text: "#CC0000", bar: "#CC0000" },
 };
-
-const PERIODOS = [
-  { label: "Mês atual", value: "mes_atual" },
-  { label: "Mês anterior", value: "mes_anterior" },
-  { label: "Últimos 30 dias", value: "30d" },
-  { label: "Últimos 90 dias", value: "90d" },
-];
 
 function KpiCard({
   label,
@@ -134,9 +128,21 @@ export default function ExecutivoPage() {
   );
 }
 
+function getDefaultDates() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = hoje.getMonth();
+  const p = (n: number) => n.toString().padStart(2, "0");
+  const inicio = `${ano}-${p(mes + 1)}-01`;
+  const fim = `${ano}-${p(mes + 1)}-${p(hoje.getDate())}`;
+  return { inicio, fim };
+}
+
 function ExecutivoDashboard() {
   const searchParams = useSearchParams();
-  const [periodo, setPeriodo] = useState("mes_atual");
+  const defaults = getDefaultDates();
+  const [dataInicio, setDataInicio] = useState(defaults.inicio);
+  const [dataFim, setDataFim] = useState(defaults.fim);
 
   const urlId = searchParams.get("id");
   const isGestorView = searchParams.get("gestor") === "true";
@@ -203,17 +209,14 @@ function ExecutivoDashboard() {
                 Voltar ao Painel do Gestor
               </a>
             )}
-            <select
-              value={periodo}
-              onChange={(e) => setPeriodo(e.target.value)}
-              className="bg-[#111111] border border-[#333333] text-white text-xs rounded px-3 py-1.5 focus:outline-none focus:border-[#CC0000] cursor-pointer"
-            >
-              {PERIODOS.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
+            <PeriodoPicker
+              dataInicio={dataInicio}
+              dataFim={dataFim}
+              onChange={(inicio, fim) => {
+                setDataInicio(inicio);
+                setDataFim(fim);
+              }}
+            />
           </div>
         </div>
       </div>
