@@ -228,23 +228,137 @@ export default function GestorDashboard() {
         </div>
 
         <SectionHeader title="Consolidado da Equipe" icon="monitoring" />
-        <div className="grid grid-cols-4 gap-4 mb-4">
-          <KpiCard label="Total Imobiliárias" valor={totalImobiliarias} sublabel={`${totalNaoIntegradas} não integradas`} />
-          <KpiCard label="Total Corretores" valor={totalCorretores} sublabel={`${totalCorretoresNovos} novos no período`} />
-          <KpiCard label="Corretores Ativos" valor={totalCorretoresAtivos} colorOverride={SEMAFORO[getSemaforoColor(totalCorretoresAtivos, gestor.meta.corretoresAtivos)].text} />
-          <KpiCard label="Novas Imobiliárias" valor={totalNovasImob} colorOverride="#00CC44" />
-        </div>
-        <div className="grid grid-cols-4 gap-4 mb-4">
-          <KpiCard label="Propostas Geradas" valor={totalPropostas} />
-          <KpiCard label="Propostas Aceitas" valor={totalAceitas} colorOverride="#00CC44" />
-          <KpiCard label="Propostas Recusadas" valor={totalRecusadas} colorOverride="#CC0000" />
-          <KpiCard label="Propostas em Aberto" valor={totalEmAberto} colorOverride="#FFCC00" />
-        </div>
-        <div className="grid grid-cols-4 gap-4">
-          <KpiCard label="Acessos aos Produtos" valor={totalAcessos} />
-          <KpiCard label="Visitas Realizadas" valor={totalVisitas} sublabel={`${totalAlcancados} corretores alcançados`} />
-          <KpiCard label="Eventos Criados" valor={totalEventos} sublabel={`${totalParticipantes} participantes`} />
-          <KpiCard label="Novos Corretores" valor={totalCorretoresNovos} colorOverride="#00CC44" />
+        <div className="grid grid-cols-2 gap-4">
+
+          {/* BLOCO: IMOBILIÁRIAS */}
+          <div className="bg-[#111111] border border-[#222222] rounded-lg p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-[#CC0000] text-lg">apartment</span>
+              <h3 className="text-white text-sm font-bold uppercase tracking-wider">Imobiliárias</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Na Carteira</span>
+                <span className="text-3xl font-bold text-white">{totalImobiliarias}</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Novas</span>
+                <span className="text-3xl font-bold text-[#00CC44]">+{totalNovasImob}</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Não Integradas</span>
+                <span className="text-3xl font-bold" style={{ color: totalNaoIntegradas > 0 ? "#FFCC00" : "#FFFFFF" }}>{totalNaoIntegradas}</span>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-[#1A1A1A]">
+              <div className="flex items-center justify-between">
+                <span className="text-[#999999] text-xs">Taxa de integração</span>
+                <span className="text-white text-sm font-bold">
+                  {totalImobiliarias > 0 ? Math.round(((totalImobiliarias - totalNaoIntegradas) / totalImobiliarias) * 100) : 0}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* BLOCO: CORRETORES */}
+          <div className="bg-[#111111] border border-[#222222] rounded-lg p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-[#CC0000] text-lg">groups</span>
+              <h3 className="text-white text-sm font-bold uppercase tracking-wider">Corretores</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Na Carteira</span>
+                <span className="text-3xl font-bold text-white">{totalCorretores}</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Ativos</span>
+                <span className="text-3xl font-bold" style={{ color: SEMAFORO[getSemaforoColor(totalCorretoresAtivos, gestor.meta.corretoresAtivos)].text }}>
+                  {totalCorretoresAtivos}
+                </span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Novos</span>
+                <span className="text-3xl font-bold text-[#00CC44]">+{totalCorretoresNovos}</span>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-[#1A1A1A]">
+              <div className="flex items-center justify-between">
+                <span className="text-[#999999] text-xs">Taxa de engajamento</span>
+                <span className="text-white text-sm font-bold">
+                  {totalCorretores > 0 ? Math.round((totalCorretoresAtivos / totalCorretores) * 100) : 0}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* BLOCO: PROPOSTAS */}
+          <div className="bg-[#111111] border border-[#222222] rounded-lg p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-[#CC0000] text-lg">description</span>
+              <h3 className="text-white text-sm font-bold uppercase tracking-wider">Propostas</h3>
+            </div>
+            <div className="grid grid-cols-4 gap-4">
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Geradas</span>
+                <span className="text-3xl font-bold text-white">{totalPropostas}</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Aceitas</span>
+                <span className="text-3xl font-bold text-[#00CC44]">{totalAceitas}</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Recusadas</span>
+                <span className="text-3xl font-bold text-[#CC0000]">{totalRecusadas}</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Em Aberto</span>
+                <span className="text-3xl font-bold text-[#FFCC00]">{totalEmAberto}</span>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-[#1A1A1A]">
+              <div className="flex items-center justify-between">
+                <span className="text-[#999999] text-xs">Taxa de aprovação</span>
+                <span className="text-white text-sm font-bold">
+                  {totalPropostas > 0 ? Math.round((totalAceitas / totalPropostas) * 100) : 0}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* BLOCO: ENGAJAMENTO */}
+          <div className="bg-[#111111] border border-[#222222] rounded-lg p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-[#CC0000] text-lg">trending_up</span>
+              <h3 className="text-white text-sm font-bold uppercase tracking-wider">Engajamento</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Acessos</span>
+                <span className="text-3xl font-bold text-white">{totalAcessos}</span>
+                <span className="text-[#999999] text-xs">aos produtos</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Visitas</span>
+                <span className="text-3xl font-bold text-white">{totalVisitas}</span>
+                <span className="text-[#999999] text-xs">{totalAlcancados} corretores</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[#888888] text-xs font-medium uppercase tracking-wider">Eventos</span>
+                <span className="text-3xl font-bold text-white">{totalEventos}</span>
+                <span className="text-[#999999] text-xs">{totalParticipantes} participantes</span>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-[#1A1A1A]">
+              <div className="flex items-center justify-between">
+                <span className="text-[#999999] text-xs">Média corretores por visita</span>
+                <span className="text-white text-sm font-bold">
+                  {totalVisitas > 0 ? (totalAlcancados / totalVisitas).toFixed(1) : "0"}
+                </span>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <div className="mt-10">
