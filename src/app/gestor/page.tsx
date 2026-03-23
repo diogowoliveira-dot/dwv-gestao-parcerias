@@ -18,6 +18,7 @@ import {
 } from "@/lib/parcerias-mock-data";
 import SimuladorMetasPropostas from "@/components/parcerias/SimuladorMetas";
 import PeriodoPicker from "@/components/parcerias/PeriodoPicker";
+import { gerarRelatorioDiretoria } from "@/components/parcerias/RelatorioDiretoriaPDF";
 
 const SEMAFORO = {
   verde: { bg: "#00CC44", text: "#00CC44", bar: "#00CC44" },
@@ -186,14 +187,23 @@ export default function GestorDashboard() {
               Gestão de Parcerias
             </span>
           </div>
-          <PeriodoPicker
-            dataInicio={dataInicio}
-            dataFim={dataFim}
-            onChange={(inicio, fim) => {
-              setDataInicio(inicio);
-              setDataFim(fim);
-            }}
-          />
+          <div className="flex items-center gap-3">
+            <PeriodoPicker
+              dataInicio={dataInicio}
+              dataFim={dataFim}
+              onChange={(inicio, fim) => {
+                setDataInicio(inicio);
+                setDataFim(fim);
+              }}
+            />
+            <button
+              onClick={() => gerarRelatorioDiretoria(dataInicio, dataFim)}
+              className="flex items-center gap-2 bg-[#CC0000] hover:bg-[#AA0000] text-white text-xs font-bold uppercase tracking-wider rounded px-4 py-2 transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-sm">picture_as_pdf</span>
+              Relatório Diretoria
+            </button>
+          </div>
         </div>
       </div>
 
