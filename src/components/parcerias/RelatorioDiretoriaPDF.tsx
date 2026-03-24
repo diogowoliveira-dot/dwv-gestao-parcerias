@@ -46,6 +46,9 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
   const contentW = pageW - margin * 2;
   let y = 0;
 
+  // Altura segura (footer ocupa 12mm)
+  const safeBottom = pageH - 20;
+
   const equipe = executivos.filter((e) => gestor.executivos.includes(e.id));
   const totalPropostas = equipe.reduce((s, e) => s + e.propostas.total, 0);
   const totalAceitas = equipe.reduce((s, e) => s + e.propostas.aceitas, 0);
@@ -91,27 +94,23 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
   // ——————————————————————————————————————
   // HELPERS DE DESENHO
   // ——————————————————————————————————————
+  function newPage() {
+    doc.addPage();
+    // Pintar fundo preto imediatamente
+    doc.setFillColor(...DWV.black);
+    doc.rect(0, 0, pageW, pageH, "F");
+    y = 18;
+  }
+
   function checkPageBreak(needed: number) {
-    if (y + needed > pageH - 20) {
-      doc.addPage();
-      drawFooter();
-      y = 20;
+    if (y + needed > safeBottom) {
+      newPage();
     }
   }
 
-  function drawFooter() {
-    const pg = doc.getNumberOfPages();
-    doc.setFillColor(...DWV.darkGray);
-    doc.rect(0, pageH - 12, pageW, 12, "F");
-    doc.setFontSize(7);
-    doc.setTextColor(...DWV.lightGray);
-    doc.text("DWV — Gestão de Parcerias | Relatório para Diretoria", margin, pageH - 5);
-    doc.text(`Página ${pg}`, pageW - margin, pageH - 5, { align: "right" });
-  }
-
   function sectionTitle(title: string) {
-    checkPageBreak(16);
-    y += 4;
+    checkPageBreak(20);
+    y += 6;
     doc.setFillColor(...DWV.red);
     doc.rect(margin, y, 3, 8, "F");
     doc.setFontSize(11);
@@ -120,7 +119,7 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
     doc.text(title.toUpperCase(), margin + 6, y + 6);
     doc.setDrawColor(34, 34, 34);
     doc.line(margin, y + 10, pageW - margin, y + 10);
-    y += 14;
+    y += 16;
   }
 
   function kpiBox(
@@ -131,7 +130,6 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
     cor: [number, number, number] = DWV.white,
     sublabel?: string
   ) {
-    checkPageBreak(24);
     doc.setFillColor(22, 22, 22);
     doc.roundedRect(x, y, w, 20, 2, 2, "F");
     doc.setFontSize(7);
@@ -151,6 +149,7 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
   }
 
   function kpiRow(items: { label: string; valor: string; cor?: [number, number, number]; sub?: string }[]) {
+    checkPageBreak(24);
     const gap = 3;
     const w = (contentW - gap * (items.length - 1)) / items.length;
     items.forEach((item, i) => {
@@ -237,10 +236,13 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
   doc.setTextColor(...DWV.white);
   doc.text(`${totalPropostas}`, margin + 10, 158);
 
+  // Medir largura do número com o font correto (28pt bold)
+  const numWidth = doc.getTextWidth(`${totalPropostas}`);
+
   doc.setFontSize(14);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 100, 100);
-  doc.text(`/ ${gestor.meta.propostas}`, margin + 10 + doc.getTextWidth(`${totalPropostas}`) + 3, 158);
+  doc.text(`/ ${gestor.meta.propostas}`, margin + 10 + numWidth + 3, 158);
 
   doc.setFontSize(20);
   doc.setFont("helvetica", "bold");
@@ -275,15 +277,10 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
     { label: "Ações Realizadas", valor: `${totalAcoes}` },
   ]);
 
-  drawFooter();
-
   // ============================================
   // PÁGINA 2 — RANKING + PERFORMANCE POR EXECUTIVO
   // ============================================
-  doc.addPage();
-  doc.setFillColor(...DWV.black);
-  doc.rect(0, 0, pageW, pageH, "F");
-  y = 16;
+  newPage();
 
   sectionTitle("Ranking de Propostas — Executivos");
 
@@ -349,6 +346,8 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
   // ============================================
   sectionTitle("Performance Individual — Carteira");
 
+  const CARD_H = 56; // Altura total do card incluindo margem
+
   ranking.forEach((exec) => {
     const totalCorr = getCorretoresTotal(exec);
     const ativos = getCorretoresAtivos(exec);
@@ -367,34 +366,38 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
       exec.acoes.solicitacoesAutorizacao +
       exec.acoes.pontuacoes;
 
-    checkPageBreak(52);
+    // Checar se o card COMPLETO cabe na página
+    checkPageBreak(CARD_H);
 
-    // Card header
+    const cardTop = y;
+    const cardInnerH = 50;
+
+    // Card background
     doc.setFillColor(22, 22, 22);
-    doc.roundedRect(margin, y, contentW, 46, 2, 2, "F");
+    doc.roundedRect(margin, cardTop, contentW, cardInnerH, 2, 2, "F");
 
     // Colored left bar based on performance
     const corBarra = semaforoCor(pctPropostas);
     doc.setFillColor(...corBarra);
-    doc.roundedRect(margin, y, 3, 46, 1, 0, "F");
-    doc.rect(margin + 1.5, y, 1.5, 46, "F");
+    doc.roundedRect(margin, cardTop, 3, cardInnerH, 1, 0, "F");
+    doc.rect(margin + 1.5, cardTop, 1.5, cardInnerH, "F");
 
-    // Name + badge
+    // Name (font 10 bold)
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...DWV.white);
-    doc.text(exec.nome, margin + 8, y + 7);
+    doc.text(exec.nome, margin + 8, cardTop + 7);
 
+    // Badge de percentual — posicionar APÓS medir com o font correto
+    const nameWidth = doc.getTextWidth(exec.nome);
     doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...corBarra);
-    doc.text(`${pctPropostas}% da meta`, margin + 8 + doc.getTextWidth(exec.nome) + 4, y + 7);
+    doc.text(`  ·  ${pctPropostas}% da meta`, margin + 8 + nameWidth, cardTop + 7);
 
-    // Row 1: Propostas
-    const r1y = y + 14;
-    doc.setFontSize(6.5);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...DWV.lightGray);
+    // Row 1: Propostas (y offset = +14)
+    const r1y = cardTop + 14;
+    const colW = (contentW - 16) / 5;
 
     const cols = [
       { label: "PROPOSTAS", valor: `${exec.propostas.total}/${exec.meta.propostas}`, cor: semaforoCor(pctPropostas) },
@@ -404,7 +407,6 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
       { label: "AÇÕES", valor: `${totalAcoesExec}`, cor: DWV.white },
     ];
 
-    const colW = (contentW - 16) / cols.length;
     cols.forEach((col, ci) => {
       const cx = margin + 8 + ci * colW;
       doc.setFontSize(6.5);
@@ -414,11 +416,11 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(...col.cor);
-      doc.text(col.valor, cx, r1y + 6);
+      doc.text(`${col.valor}`, cx, r1y + 6);
     });
 
-    // Row 2: Carteira
-    const r2y = r1y + 14;
+    // Row 2: Carteira (y offset = +28)
+    const r2y = cardTop + 28;
     const cols2 = [
       { label: "CORRETORES", valor: `${ativos}/${totalCorr}`, cor: semaforoCor(pctCorretores) },
       { label: "META ATIVOS", valor: `${exec.meta.corretoresAtivos}`, cor: DWV.white },
@@ -436,11 +438,11 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(...col.cor);
-      doc.text(col.valor, cx, r2y + 6);
+      doc.text(`${col.valor}`, cx, r2y + 6);
     });
 
-    // Row 3: Engajamento
-    const r3y = r2y + 14;
+    // Row 3: Engajamento (y offset = +42)
+    const r3y = cardTop + 42;
     const cols3 = [
       { label: "VISITAS", valor: `${exec.visitas.realizadas}`, cor: DWV.white },
       { label: "CORR. ALCANÇADOS", valor: `${exec.visitas.corretoresAlcancados}`, cor: DWV.white },
@@ -458,19 +460,18 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(...col.cor);
-      doc.text(col.valor, cx, r3y + 5);
+      doc.text(`${col.valor}`, cx, r3y + 5);
     });
 
-    y += 52;
+    y = cardTop + CARD_H;
   });
 
   // ============================================
-  // PÁGINA FINAL — CARTEIRA CONSOLIDADA
+  // SEÇÃO FINAL — CARTEIRA CONSOLIDADA
   // ============================================
-  checkPageBreak(50);
+  checkPageBreak(70);
   sectionTitle("Visão Consolidada — Carteira da Equipe");
 
-  y += 2;
   kpiRow([
     { label: "Imobiliárias", valor: `${totalImobiliarias}`, sub: `${totalNovasImob} novas | ${totalNaoIntegradas} não integradas` },
     { label: "Corretores", valor: `${totalCorretores}`, sub: `${totalCorretoresAtivos} ativos | ${totalCorretoresNovos} novos` },
@@ -481,7 +482,7 @@ export function gerarRelatorioDiretoria(dataInicio: string, dataFim: string) {
   y += 4;
 
   // Tabela de crescimento de carteira
-  checkPageBreak(40);
+  checkPageBreak(50);
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...DWV.lightGray);
